@@ -1,6 +1,11 @@
 import { Dispatch } from 'redux'
 import { TodoActionType, TodoActions } from './types'
 
+export const addTodoList = (): TodoActions => {
+    return {
+        type: TodoActionType.AddTodoList,
+    }
+}
 
 export const addTodoListItem = (listId: string, label: string): TodoActions => {
     return {

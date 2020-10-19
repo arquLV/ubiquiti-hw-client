@@ -18,33 +18,49 @@ const initialState: TodoState = {
     activeListIdx: 0,
     // lastUpdated: new Date(),
     lists: [
-        {
-            id: 'testlist',
-            title: 'Shopping list',
-            items: [
-                {
-                    id: 'first',
-                    label: 'Milk',
-                    isDone: false,
-                },
-                {
-                    id: 'second',
-                    label: 'Bread',
-                    isDone: false,
-                },
-                {
-                    id: 'third',
-                    label: 'Pasta',
-                    isDone: true,
-                },
-            ],
-        }
+        // {
+        //     id: 'testlist',
+        //     title: 'Shopping list',
+        //     items: [
+        //         {
+        //             id: 'first',
+        //             label: 'Milk',
+        //             isDone: false,
+        //         },
+        //         {
+        //             id: 'second',
+        //             label: 'Bread',
+        //             isDone: false,
+        //         },
+        //         {
+        //             id: 'third',
+        //             label: 'Pasta',
+        //             isDone: true,
+        //         },
+        //     ],
+        // }
     ],
 }
 
 export default (state = initialState, action: TodoActions): TodoState => {
     console.log(action);
     switch (action.type) {
+
+        case TodoActionType.AddTodoList: {
+            const lists = [...state.lists];
+            const newListsLength = lists.push({
+                id: 'newlist',
+                title: 'New ToDo List',
+                items: [],
+            });
+
+            return {
+                ...state,
+                activeListIdx: newListsLength - 1,
+                lists,
+            }
+        }
+
         case TodoActionType.AddTodoListItem: {
             const { listId, label } = action.data;
             

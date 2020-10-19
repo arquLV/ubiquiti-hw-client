@@ -1,7 +1,12 @@
 export enum TodoActionType {
+    AddTodoList = "ADD_TODO_LIST",
     AddTodoListItem = "ADD_TODO_LIST_ITEM",
     SetTodoItemDone = "SET_TODO_ITEM_DONE",
     SetTodoItemPending = "SET_TODO_ITEM_PENDING",
+}
+
+interface AddTodoListAction {
+    type: TodoActionType.AddTodoList,
 }
 
 interface AddTodoListItemAction {
@@ -28,4 +33,5 @@ interface SetTodoItemPendingAction {
     }
 }
 
-export type TodoActions = AddTodoListItemAction | SetTodoItemDoneAction | SetTodoItemPendingAction;
+export type TodoActions = AddTodoListAction | AddTodoListItemAction | 
+    SetTodoItemDoneAction | SetTodoItemPendingAction;
