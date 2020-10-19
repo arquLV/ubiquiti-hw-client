@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { Dispatch, bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
 import { AppState } from '../../store';
+import { addTodoListItem } from '../../store/todo/actions';
+
 import Checkbox from '../inputs/Checkbox';
 
 const TodoListContainer = styled.div`
@@ -33,17 +35,35 @@ const TodoItem: React.FC = props => {
     );
 }
 
-const NewItem: React.FC = props => {
+type NewItemsProps = {
+    onSubmit: (content: string) => void,
+}
+const NewItem: React.FC<NewItemsProps> = props => {
+
+    const [content, setContent] = useState('');
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (["Enter", "Tab"].includes(e.key)) {
-            console.log('Submit!');
+            console.log(content);
+            props.onSubmit(content);
+
+            // Reset input field content to empty string
+            setContent('');
         }
+    }
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setContent(e.target.value);
     }
 
     return (
         <li>
-            <input type="text" onKeyDown={handleKeyPress} />
+            <input 
+                type="text"
+                onChange={handleChange}
+                onKeyDown={handleKeyPress} 
+                value={content}
+            />
         </li>
     );
 }
@@ -51,13 +71,23 @@ const NewItem: React.FC = props => {
 type TodoListProps = {} & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 const TodoList: React.FC<TodoListProps> = props => {
     console.log(props);
+
+    const todoList = props.lists[props.activeListIdx];
+
+    const { id: listId } = todoList;
+    const { addTodoListItem } = props.actions; 
+
+    const handleNewItem = useCallback((itemLabel: string) => {
+        addTodoListItem(listId, itemLabel);
+    }, [addTodoListItem, listId]);
+
     return (
         <TodoListContainer>
-            <ListHeading>{props.todoList.title}</ListHeading>
+            <ListHeading>{todoList.title}</ListHeading>
 
             <ItemsList>
                 <TodoItem>
-                    {props.todoList.items.map(item => (
+                    {todoList.items.map(item => (
                         <Checkbox 
                             key={item.id}
                             name={item.id}
@@ -66,18 +96,20 @@ const TodoList: React.FC<TodoListProps> = props => {
                     ))}
                 </TodoItem>
 
-                <NewItem />
+                <NewItem 
+                    onSubmit={handleNewItem}
+                />
             </ItemsList>
         </TodoListContainer>
     );
 }
 
 const mapStateToProps = (state: AppState) => ({
-    todoList: state.todo.lists[state.todo.activeListIdx],
+    ...state.todo,
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-    ...bindActionCreators({}, dispatch),
+    actions: bindActionCreators({ addTodoListItem }, dispatch),
 });
 
 export default connect(

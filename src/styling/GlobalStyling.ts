@@ -7,4 +7,10 @@ export default createGlobalStyle<{ theme: ThemeType }>`
         font-family: ${props => props.theme.fonts.primary}, sans-serif;
         background-color: ${props => props.theme.colors.darkGrey};
     }
+
+    input {
+        &:focus {
+            outline: none;
+        }
+    }
 `;

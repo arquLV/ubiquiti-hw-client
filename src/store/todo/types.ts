@@ -4,6 +4,10 @@ export enum TodoActionType {
 
 interface AddTodoListItemAction {
     type: TodoActionType.AddTodoListItem,
+    data: {
+        listId: string,
+        label: string,
+    }
 }
 
 export type TodoActions = AddTodoListItemAction;
