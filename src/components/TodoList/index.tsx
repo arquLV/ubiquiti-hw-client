@@ -4,16 +4,22 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 
 import { AppState } from '../../store';
-import { addTodoListItem } from '../../store/todo/actions';
+import {
+    addTodoListItem,
+    setTodoItemDone,
+    setTodoItemPending,
+} from '../../store/todo/actions';
 
 import Checkbox from '../inputs/Checkbox';
+import TodoItem from './TodoItem';
+import Editable from '../inputs/Editable';
 
 const TodoListContainer = styled.div`
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate3d(-50%, -50%, 0);
-    background: #fff;
+    background: ${props => props.theme.colors.white};
     width: 500px;
 
     border-radius: 8px;
@@ -28,12 +34,6 @@ const ListHeading = styled.h3`
 const ItemsList = styled.ul`
 
 `;
-
-const TodoItem: React.FC = props => {
-    return (
-        <li>{props.children}</li>
-    );
-}
 
 type NewItemsProps = {
     onSubmit: (content: string) => void,
@@ -75,7 +75,11 @@ const TodoList: React.FC<TodoListProps> = props => {
     const todoList = props.lists[props.activeListIdx];
 
     const { id: listId } = todoList;
-    const { addTodoListItem } = props.actions; 
+    const { 
+        addTodoListItem,
+        setTodoItemDone,
+        setTodoItemPending,
+    } = props.actions; 
 
     const handleNewItem = useCallback((itemLabel: string) => {
         addTodoListItem(listId, itemLabel);
@@ -83,18 +87,22 @@ const TodoList: React.FC<TodoListProps> = props => {
 
     return (
         <TodoListContainer>
-            <ListHeading>{todoList.title}</ListHeading>
+            <Editable textComponent={ListHeading}>{todoList.title}</Editable>
 
             <ItemsList>
-                <TodoItem>
-                    {todoList.items.map(item => (
-                        <Checkbox 
-                            key={item.id}
-                            name={item.id}
-                            checked={item.isDone}
-                        >{item.label}</Checkbox>
-                    ))}
-                </TodoItem>
+                {todoList.items.map(item => (
+                    <TodoItem
+                        key={item.id}
+                        isDone={item.isDone}
+                        onCheckboxClick={() => {
+                            if (item.isDone) {
+                                setTodoItemPending(listId, item.id);
+                            } else {
+                                setTodoItemDone(listId, item.id);
+                            }
+                        }}
+                    >{item.label}</TodoItem>
+                ))}
 
                 <NewItem 
                     onSubmit={handleNewItem}
@@ -109,7 +117,11 @@ const mapStateToProps = (state: AppState) => ({
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-    actions: bindActionCreators({ addTodoListItem }, dispatch),
+    actions: bindActionCreators({
+        addTodoListItem,
+        setTodoItemDone,
+        setTodoItemPending,
+    }, dispatch),
 });
 
 export default connect(

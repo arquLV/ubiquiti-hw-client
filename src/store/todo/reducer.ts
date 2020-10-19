@@ -56,12 +56,40 @@ export default (state = initialState, action: TodoActions): TodoState => {
                 label,
             });
 
-            console.log(lists);
-
             return {
                 ...state,
                 lists,
                 // lastUpdated: new Date(),
+            }
+        }
+
+        case TodoActionType.SetTodoItemDone: {
+            const { listId, itemId } = action.data;
+
+            const lists = [...state.lists];
+            const targetListIdx = lists.findIndex(list => list.id === listId);
+            const targetItemIdx = lists[targetListIdx].items.findIndex(item => item.id === itemId);
+        
+            lists[targetListIdx].items[targetItemIdx].isDone = true;
+
+            return {
+                ...state,
+                lists,
+            }
+        }
+
+        case TodoActionType.SetTodoItemPending: {
+            const { listId, itemId } = action.data;
+
+            const lists = [...state.lists];
+            const targetListIdx = lists.findIndex(list => list.id === listId);
+            const targetItemIdx = lists[targetListIdx].items.findIndex(item => item.id === itemId);
+        
+            lists[targetListIdx].items[targetItemIdx].isDone = false;
+
+            return {
+                ...state,
+                lists,
             }
         }
 
