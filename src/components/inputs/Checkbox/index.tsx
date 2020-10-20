@@ -13,6 +13,8 @@ const Checkbox = styled.input.attrs(props => ({
     border-radius: 3px;
     border: 2px solid ${props => props.theme.colors.lightGrey};
 
+    margin: 0;
+
     cursor: pointer;
 
     &:hover {

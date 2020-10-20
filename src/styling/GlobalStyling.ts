@@ -8,7 +8,7 @@ export default createGlobalStyle<{ theme: ThemeType }>`
         background-color: ${props => props.theme.colors.lightGrey};
     }
 
-    input, button {
+    input, textarea, button {
         font-family: ${props => props.theme.fonts.primary}, sans-serif;
         &:focus {
             outline: none;

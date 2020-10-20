@@ -2,8 +2,6 @@ import React from 'react';
 import styled, { ThemeProvider } from 'styled-components';
 import { Reset } from 'styled-reset';
 
-import TodoList from './components/TodoList';
-
 import AuthPage from './pages/Auth';
 import TodoPage from './pages/Todo';
 
@@ -13,12 +11,14 @@ import AppTheme from './styling/AppTheme';
 import { ReactComponent as TodoLogo } from './icons/todo.svg';
 
 const AppContainer = styled.div`
+    height: 100vh;
+    box-sizing: border-box;
     padding-top: 57px;
 `;
 
 const ContentWrapper = styled.div`
     position: relative;
-    height: 100vh;
+    height: 100%;
 `;
 
 const Header = styled.header`

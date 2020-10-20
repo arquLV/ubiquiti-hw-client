@@ -1,12 +1,19 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
 import styled from 'styled-components';
 
-import { addTodoList } from '../../store/todo/actions';
+import { 
+    updateTodoList,
+    requestNewTodoList,
+    addTodoList,
+} from '../../store/todo/actions';
 import { AppState } from '../../store';
 
-import TodoList from '../../components/TodoList';
+import SocketContext from '../../sockets';
+
+import TodoList from '../../components/Todo/TodoList';
+import NewList from '../../components/Todo/NewList';
 
 const NoTodosWrapper = styled.div`
     position: absolute;
@@ -56,20 +63,61 @@ const NoTodosView: React.FC<NoTodosProps> = props => {
     );
 }
 
+const ListsContainer = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+`;
+
 type TodoPageProps = {
 
 } & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 const TodoPage: React.FC<TodoPageProps> = props => {
     
-    const { lists: todoLists } = props;
+    const { socket } = useContext(SocketContext);
+
+    const { 
+        lists: todoLists,
+        actions: { 
+            updateTodoList,
+            requestNewTodoList,
+            addTodoList,
+        },
+    } = props;
+
+    useEffect(() => {
+        console.log('SETTING UP SOCKET LISTENER');
+
+        socket.on('todo/add', ({ listId }: { listId: string }) => {
+            console.log(listId);
+            addTodoList(listId);
+        });
+
+        type TodoUpdateRequest = {
+            listId: string,
+            data: {
+                title: string,
+            }
+        }
+        socket.on('todo/update', (update: TodoUpdateRequest) => {
+            updateTodoList(update.listId, update.data.title);
+        });
+
+    }, [socket]);
+
     if (todoLists.length > 0) {
         return (
-            <TodoList></TodoList>
+            <ListsContainer>
+                <NewList />
+                <TodoList></TodoList>
+            </ListsContainer>
         );
     } else {
         return (
             <NoTodosView 
-                onCTAClick={props.actions.addTodoList}
+                onCTAClick={() => {
+                    requestNewTodoList(socket);
+                }}
             />
         );
     }
@@ -81,6 +129,8 @@ const mapStateToProps = (state: AppState) => ({
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
     actions: bindActionCreators({
+        updateTodoList,
+        requestNewTodoList,
         addTodoList,
     }, dispatch),
 })

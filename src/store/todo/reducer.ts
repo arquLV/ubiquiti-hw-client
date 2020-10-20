@@ -47,9 +47,11 @@ export default (state = initialState, action: TodoActions): TodoState => {
     switch (action.type) {
 
         case TodoActionType.AddTodoList: {
+            const { data: { listId }} = action;
+
             const lists = [...state.lists];
             const newListsLength = lists.push({
-                id: 'newlist',
+                id: listId,
                 title: 'New ToDo List',
                 items: [],
             });
@@ -58,6 +60,20 @@ export default (state = initialState, action: TodoActions): TodoState => {
                 ...state,
                 activeListIdx: newListsLength - 1,
                 lists,
+            }
+        }
+
+        case TodoActionType.UpdateTodoList: {
+            const { listId, title } = action.data;
+            
+            const lists = [...state.lists];
+            const targetListIdx = lists.findIndex(list => list.id === listId);
+
+            lists[targetListIdx].title = title;
+
+            return {
+                ...state,
+                lists
             }
         }
 

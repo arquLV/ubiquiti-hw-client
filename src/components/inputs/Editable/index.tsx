@@ -7,15 +7,23 @@ const EditableInput = styled.input.attrs(props => ({
 }))`
     border: none;
     font-size: inherit;
+    font-weight: inherit;
+    padding: 0;
+    width: 100%;
 `;
 
 type EditableProps = {
     textComponent: React.FC<any>,
     children: string,
+    placeholder?: string,
+
+    onEdit?: (content: string) => void,
 }
 const Editable: React.FC<EditableProps> = props => {
     const [editing, setEditState] = useState(false);
-    const [content, setContent] = useState(props.children);
+    // const [content, setContent] = useState(props.children);
+
+    // const isEmpty = content.length === 0;
     
     const editableRef = useRef<HTMLInputElement>(null);
     useClickOutside(editableRef, () => {
@@ -31,7 +39,7 @@ const Editable: React.FC<EditableProps> = props => {
     }, [editing]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setContent(e.target.value);
+        props.onEdit?.(e.target.value);
     }
 
     const handleKeydown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -46,7 +54,10 @@ const Editable: React.FC<EditableProps> = props => {
         setEditState(true);
     }
 
-    const { textComponent: TextComponent } = props;
+    const { 
+        textComponent: TextComponent,
+        placeholder
+    } = props;
 
     if (editing) {
         return (
@@ -55,7 +66,8 @@ const Editable: React.FC<EditableProps> = props => {
                     onChange={handleChange}
                     onKeyDown={handleKeydown}
                     ref={editableRef}
-                    value={content} 
+                    value={props.children} 
+                    placeholder={placeholder}
                 />
             </TextComponent>
         )
@@ -63,7 +75,7 @@ const Editable: React.FC<EditableProps> = props => {
         return (
             <TextComponent
                 onClick={handleClick}
-            >{content}</TextComponent>
+            >{props.children}</TextComponent>
         );
     }
 }
