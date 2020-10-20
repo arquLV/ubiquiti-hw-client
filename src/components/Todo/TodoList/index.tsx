@@ -6,9 +6,8 @@ import styled, { keyframes } from 'styled-components';
 import { AppState } from '../../../store';
 import {
     editTodoList,
-    addTodoListItem,
-    setTodoItemDone,
-    setTodoItemPending,
+    createTodoListItem,
+    editTodoListItem
 } from '../../../store/todo/actions';
 import SocketContext from '../../../sockets';
 
@@ -82,9 +81,8 @@ const TodoList: React.FC<TodoListProps> = props => {
     const { id: listId } = todoList;
     const { 
         editTodoList,
-        addTodoListItem,
-        setTodoItemDone,
-        setTodoItemPending,
+        createTodoListItem,
+        editTodoListItem
     } = props.actions; 
 
     const handleTitleEdit = (newTitle: string) => {
@@ -93,8 +91,8 @@ const TodoList: React.FC<TodoListProps> = props => {
     }
 
     const handleNewItem = useCallback((itemLabel: string) => {
-        addTodoListItem(listId, itemLabel);
-    }, [addTodoListItem, listId]);
+        createTodoListItem(socket, listId, itemLabel);
+    }, [createTodoListItem, listId]);
 
     return (
         <TodoListContainer>
@@ -109,12 +107,13 @@ const TodoList: React.FC<TodoListProps> = props => {
                     <TodoItem
                         key={item.id}
                         isDone={item.isDone}
+
                         onCheckboxClick={() => {
-                            if (item.isDone) {
-                                setTodoItemPending(listId, item.id);
-                            } else {
-                                setTodoItemDone(listId, item.id);
-                            }
+                            editTodoListItem(socket, listId, item.id, { isDone: !item.isDone });
+                        }}
+
+                        onLabelEdit={newLabel => {
+                            editTodoListItem(socket, listId, item.id, { label: newLabel });
                         }}
                     >{item.label}</TodoItem>
                 ))}
@@ -133,9 +132,8 @@ const mapStateToProps = (state: AppState) => ({
 const mapDispatchToProps = (dispatch: Dispatch) => ({
     actions: bindActionCreators({
         editTodoList,
-        addTodoListItem,
-        setTodoItemDone,
-        setTodoItemPending,
+        createTodoListItem,
+        editTodoListItem
     }, dispatch),
 });
 

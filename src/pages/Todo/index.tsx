@@ -4,9 +4,12 @@ import { bindActionCreators, Dispatch } from 'redux';
 import styled from 'styled-components';
 
 import { 
+    fetchTodoLists,
     updateTodoList,
     requestNewTodoList,
     addTodoList,
+    addTodoListItem,
+    updateTodoListItem,
 } from '../../store/todo/actions';
 import { AppState } from '../../store';
 
@@ -78,14 +81,19 @@ const TodoPage: React.FC<TodoPageProps> = props => {
 
     const { 
         lists: todoLists,
-        actions: { 
+        actions: {
+            fetchTodoLists, 
             updateTodoList,
             requestNewTodoList,
             addTodoList,
+            addTodoListItem,
+            updateTodoListItem,
         },
     } = props;
 
     useEffect(() => {
+        fetchTodoLists();
+
         console.log('SETTING UP SOCKET LISTENER');
 
         socket.on('todo/add', ({ listId }: { listId: string }) => {
@@ -101,6 +109,34 @@ const TodoPage: React.FC<TodoPageProps> = props => {
         }
         socket.on('todo/update', (update: TodoUpdateRequest) => {
             updateTodoList(update.listId, update.data.title);
+        });
+
+        type TodoNewItemRequest = {
+            listId: string,
+            data: {
+                id: string,
+                label: string,
+            }
+        }
+        socket.on('todo/addItem', (newItem: TodoNewItemRequest) => {
+            addTodoListItem(newItem.listId, newItem.data.id, newItem.data.label);
+        });
+
+        type TodoUpdateItemRequest = {
+            listId: string,
+            itemId: string,
+            data: {
+                label?: string,
+                isDone?: boolean,
+            }
+        }
+        socket.on('todo/editItem', (updatedItem: TodoUpdateItemRequest) => {
+            const {
+                listId,
+                itemId,
+                data: { label, isDone },
+            } = updatedItem;
+            updateTodoListItem(listId, itemId, label, isDone);
         });
 
     }, [socket]);
@@ -129,9 +165,12 @@ const mapStateToProps = (state: AppState) => ({
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
     actions: bindActionCreators({
+        fetchTodoLists,
         updateTodoList,
         requestNewTodoList,
         addTodoList,
+        addTodoListItem,
+        updateTodoListItem,
     }, dispatch),
 })
 

@@ -1,21 +1,16 @@
-import { TodoActionType, TodoActions } from './types';
+import { TodoActionType, TodoActions, TodoListData } from './types';
 
 type TodoState = {
     activeListIdx: number,
     // lastUpdated: Date,
-    lists: {
-        id: string,
-        title: string,
-        items: {
-            id: string,
-            label: string,
-            isDone: boolean,
-        }[],
-    }[],
+
+    loaded: boolean,
+    lists: TodoListData[],
 }
 
 const initialState: TodoState = {
     activeListIdx: 0,
+    loaded: false,
     // lastUpdated: new Date(),
     lists: [
         // {
@@ -63,6 +58,16 @@ export default (state = initialState, action: TodoActions): TodoState => {
             }
         }
 
+        case TodoActionType.PopulateTodoLists: {
+            const { data: { lists }} = action;
+
+            return {
+                ...state,
+                lists,
+                loaded: true,
+            }
+        }
+
         case TodoActionType.UpdateTodoList: {
             const { listId, title } = action.data;
             
@@ -78,12 +83,12 @@ export default (state = initialState, action: TodoActions): TodoState => {
         }
 
         case TodoActionType.AddTodoListItem: {
-            const { listId, label } = action.data;
+            const { listId, itemId, label } = action.data;
             
             const lists = [...state.lists];
             const targetListIdx = lists.findIndex(list => list.id === listId);
             lists[targetListIdx].items.push({
-                id: 'GENERATE NEW ID HERE',
+                id: itemId,
                 isDone: false,
                 label,
             });
@@ -92,6 +97,28 @@ export default (state = initialState, action: TodoActions): TodoState => {
                 ...state,
                 lists,
                 // lastUpdated: new Date(),
+            }
+        }
+
+        case TodoActionType.UpdateTodoListItem: {
+            const { listId, itemId, label, isDone } = action.data;
+
+            const lists = [...state.lists];
+            const targetListIdx = lists.findIndex(list => list.id === listId);
+            const targetItemIdx = lists[targetListIdx].items.findIndex(item => item.id === itemId);
+
+            const item = lists[targetListIdx].items[targetItemIdx];
+
+            if (label !== undefined) {
+                item.label = label;
+            }
+            if (isDone !== undefined) {
+                item.isDone = isDone;
+            }
+
+            return {
+                ...state,
+                lists,
             }
         }
 

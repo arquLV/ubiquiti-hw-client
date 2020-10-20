@@ -24,15 +24,22 @@ type TodoItemProps = {
     children: string,
 
     onCheckboxClick?: () => void,
+    onLabelEdit?: (newLabel: string) => void,
 }
 const TodoItem: React.FC<TodoItemProps> = props => {
 
-    const { onCheckboxClick } = props;
+    const { 
+        onCheckboxClick,
+        onLabelEdit,
+    } = props;
 
     return (
         <ItemContainer>
             <Checkbox checked={props.isDone} onChange={onCheckboxClick} />
-            <Editable textComponent={ItemLabel}>{props.children}</Editable>
+            <Editable 
+                textComponent={ItemLabel}
+                onEdit={onLabelEdit}
+            >{props.children}</Editable>
         </ItemContainer>
     );
 }
