@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import styled, { StyledComponentBase } from 'styled-components';
+import styled from 'styled-components';
 import useClickOutside from '../../../hooks/useClickOutside';
 
 const EditableInput = styled.input.attrs(props => ({
@@ -14,16 +14,25 @@ const EditableInput = styled.input.attrs(props => ({
 
 type EditableProps = {
     textComponent: React.FC<any>,
+
     children: string,
     placeholder?: string,
 
     onEdit?: (content: string) => void,
+
+    [otherProps: string]: any,
 }
 const Editable: React.FC<EditableProps> = props => {
     const [editing, setEditState] = useState(false);
-    // const [content, setContent] = useState(props.children);
+    
+    const { 
+        textComponent: TextComponent,
+        children,
+        placeholder,
+        onEdit,
+        ...restProps
+    } = props;
 
-    // const isEmpty = content.length === 0;
     
     const editableRef = useRef<HTMLInputElement>(null);
     useClickOutside(editableRef, () => {
@@ -39,7 +48,7 @@ const Editable: React.FC<EditableProps> = props => {
     }, [editing]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        props.onEdit?.(e.target.value);
+        onEdit?.(e.target.value);
     }
 
     const handleKeydown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -54,19 +63,16 @@ const Editable: React.FC<EditableProps> = props => {
         setEditState(true);
     }
 
-    const { 
-        textComponent: TextComponent,
-        placeholder
-    } = props;
+    
 
     if (editing) {
         return (
-            <TextComponent>
+            <TextComponent {...restProps}>
                 <EditableInput
                     onChange={handleChange}
                     onKeyDown={handleKeydown}
                     ref={editableRef}
-                    value={props.children} 
+                    value={children} 
                     placeholder={placeholder}
                 />
             </TextComponent>
@@ -75,7 +81,8 @@ const Editable: React.FC<EditableProps> = props => {
         return (
             <TextComponent
                 onClick={handleClick}
-            >{props.children}</TextComponent>
+                {...restProps}
+            >{children}</TextComponent>
         );
     }
 }

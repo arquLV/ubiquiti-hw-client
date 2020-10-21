@@ -1,8 +1,12 @@
-import { TodoActionType, TodoActions, TodoListData } from './types';
+import { 
+    TodoActionType, 
+    TodoActions, 
+    TodoListData, 
+    ItemSortingMode, 
+} from './types';
 
 type TodoState = {
     activeListIdx: number,
-    // lastUpdated: Date,
 
     loaded: boolean,
     lists: TodoListData[],
@@ -11,7 +15,7 @@ type TodoState = {
 const initialState: TodoState = {
     activeListIdx: 0,
     loaded: false,
-    // lastUpdated: new Date(),
+    
     lists: [
         // {
         //     id: 'testlist',
@@ -49,6 +53,8 @@ export default (state = initialState, action: TodoActions): TodoState => {
                 id: listId,
                 title: 'New ToDo List',
                 items: [],
+
+                sortingMode: ItemSortingMode.All,
             });
 
             return {
@@ -60,6 +66,10 @@ export default (state = initialState, action: TodoActions): TodoState => {
 
         case TodoActionType.PopulateTodoLists: {
             const { data: { lists }} = action;
+
+            lists.forEach(list => {
+                list.sortingMode = ItemSortingMode.All;
+            });
 
             return {
                 ...state,
@@ -149,6 +159,20 @@ export default (state = initialState, action: TodoActions): TodoState => {
             return {
                 ...state,
                 lists,
+            }
+        }
+
+        case TodoActionType.SetItemSortingMode: {
+            const { listId, sortingMode } = action.data;
+
+            const lists = [...state.lists];
+            const targetListIdx = lists.findIndex(list => list.id === listId);
+
+            lists[targetListIdx].sortingMode = sortingMode;
+
+            return {
+                ...state,
+                lists
             }
         }
 

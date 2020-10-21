@@ -1,3 +1,9 @@
+export enum ItemSortingMode {
+    All = "SORT_MODE_ALL",
+    Done = "SORT_MODE_DONE",
+    Pending = "SORT_MODE_PENDING",
+}
+
 export type TodoListData = {
     id: string,
     title: string,
@@ -6,6 +12,9 @@ export type TodoListData = {
         label: string,
         isDone: boolean,
     }[],
+
+    // Local
+    sortingMode: ItemSortingMode,
 }
 
 export enum TodoActionType {
@@ -17,6 +26,8 @@ export enum TodoActionType {
     UpdateTodoListItem = "UPDATE_TODO_LIST_ITEM",
     SetTodoItemDone = "SET_TODO_ITEM_DONE",
     SetTodoItemPending = "SET_TODO_ITEM_PENDING",
+
+    SetItemSortingMode = "SET_ITEM_SORTING_MODE",
 }
 
 interface AddTodoListAction {
@@ -76,5 +87,13 @@ interface SetTodoItemPendingAction {
     }
 }
 
+interface SetItemSortingModeAction {
+    type: TodoActionType.SetItemSortingMode,
+    data: {
+        listId: string,
+        sortingMode: ItemSortingMode,
+    }
+}
+
 export type TodoActions = AddTodoListAction | PopulateTodoListsAction | UpdateTodoListAction | AddTodoListItemAction | 
-    UpdateTodoListItemAction | SetTodoItemDoneAction | SetTodoItemPendingAction;
+    UpdateTodoListItemAction | SetTodoItemDoneAction | SetTodoItemPendingAction | SetItemSortingModeAction;

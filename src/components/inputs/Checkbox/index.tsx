@@ -5,7 +5,7 @@ import checkIcon from '../../../icons/check.svg';
 const Checkbox = styled.input.attrs(props => ({
     type: 'checkbox',
 }))`
-    -webkit-appearance: none;
+    appearance: none;
 
     position: relative;
     width: 24px;
@@ -13,6 +13,7 @@ const Checkbox = styled.input.attrs(props => ({
     border-radius: 3px;
     border: 2px solid ${props => props.theme.colors.lightGrey};
 
+    flex-shrink: 0;
     margin: 0;
 
     cursor: pointer;

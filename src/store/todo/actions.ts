@@ -2,17 +2,14 @@ import axios from 'axios';
 import { Dispatch } from 'redux';
 import { v4 as uuid } from 'uuid';
 
-import { TodoActionType, TodoActions, TodoListData } from './types';
+import { 
+    TodoActionType, 
+    TodoActions, 
+    TodoListData, 
+    ItemSortingMode 
+} from './types';
 
-export const fetchTodoLists = () => (dispatch: Dispatch) => {
-    axios.get<{ lists: TodoListData[]}>(`${process.env.REACT_APP_API_URL}/todos`).then(res => {
-        const { lists } = res.data;
-        dispatch(populateTodoLists(lists));
 
-    }).catch(err => {
-        console.error(err);
-    });
-}
 
 /**
  * Adds a new Todo list to the store locally
@@ -26,15 +23,6 @@ export const addTodoList = (listId: string): TodoActions => {
             listId,
         }
     }
-}
-
-/**
- * Requests the server to create a new todo list via the provided `socket`
- * @param socket 
- */
-export const requestNewTodoList = (socket: SocketIOClient.Socket) => (dispatch: Dispatch) => {
-    // dispatch(addTodoList());
-    socket.emit('todo/create', {});
 }
 
 const populateTodoLists = (lists: TodoListData[]): TodoActions => {
@@ -56,6 +44,65 @@ export const updateTodoList = (listId: string, title: string): TodoActions => {
     }
 }
 
+export const addTodoListItem = (listId: string, itemId: string, label: string): TodoActions => {
+    return {
+        type: TodoActionType.AddTodoListItem,
+        data: {
+            listId,
+            itemId,
+            label,
+        },
+    }
+}
+
+export const updateTodoListItem = (listId: string, itemId: string, label?: string, isDone?: boolean): TodoActions => {
+    return {
+        type: TodoActionType.UpdateTodoListItem,
+        data: {
+            listId,
+            itemId,
+            label,
+            isDone,
+        }
+    }
+}
+
+export const setItemSortingMode = (listId: string, sortingMode: ItemSortingMode): TodoActions => {
+    return {
+        type: TodoActionType.SetItemSortingMode,
+        data: {
+            listId,
+            sortingMode,
+        }
+    }
+}
+
+
+/*********************************************************************************/
+
+
+export const fetchTodoLists = () => (dispatch: Dispatch) => {
+    axios.get<{ lists: TodoListData[]}>(`${process.env.REACT_APP_API_URL}/todos`).then(res => {
+        const { lists } = res.data;
+        dispatch(populateTodoLists(lists));
+
+    }).catch(err => {
+        console.error(err);
+    });
+}
+
+
+/**
+ * Requests the server to create a new todo list via the provided `socket`
+ * @param socket 
+ */
+export const requestNewTodoList = (socket: SocketIOClient.Socket) => (dispatch: Dispatch) => {
+    // dispatch(addTodoList());
+    socket.emit('todo/create', {});
+}
+
+
+
 // type TodoListData = {
 //     title: string,
 // }
@@ -69,16 +116,6 @@ export const editTodoList = (socket: SocketIOClient.Socket, listId: string, data
     dispatch(updateTodoList(listId, data.title));
 }
 
-export const addTodoListItem = (listId: string, itemId: string, label: string): TodoActions => {
-    return {
-        type: TodoActionType.AddTodoListItem,
-        data: {
-            listId,
-            itemId,
-            label,
-        },
-    }
-}
 
 export const createTodoListItem = (socket: SocketIOClient.Socket, listId: string, label: string) => (dispatch: Dispatch) => {
     const itemTempId = uuid();
@@ -117,19 +154,6 @@ type TodoItemData = {
     label?: string,
     isDone?: boolean,
 }
-
-export const updateTodoListItem = (listId: string, itemId: string, label?: string, isDone?: boolean): TodoActions => {
-    return {
-        type: TodoActionType.UpdateTodoListItem,
-        data: {
-            listId,
-            itemId,
-            label,
-            isDone,
-        }
-    }
-}
-
 export const editTodoListItem = (socket: SocketIOClient.Socket, listId: string, itemId: string, data: TodoItemData) => (dispatch: Dispatch) => {
     socket.emit('todo/editItem', {
         listId,

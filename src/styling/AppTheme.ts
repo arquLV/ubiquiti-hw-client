@@ -1,9 +1,10 @@
 const AppTheme = {
     fonts: {
-        primary: 'Lato',
+        primary: 'Roboto',
     },
     colors: {
         white: '#FFF',
+        black: '#101010',
 
         darkGrey: '#11181C',
         mediumGrey: '#9F9F9F',

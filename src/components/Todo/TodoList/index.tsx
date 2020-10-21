@@ -7,13 +7,16 @@ import { AppState } from '../../../store';
 import {
     editTodoList,
     createTodoListItem,
-    editTodoListItem
+    editTodoListItem,
+    setItemSortingMode,
 } from '../../../store/todo/actions';
+import { ItemSortingMode } from '../../../store/todo/types';
 import SocketContext from '../../../sockets';
 
 import TodoItem from './TodoItem';
 import Editable from '../../inputs/Editable';
 import NewItem from './NewItem';
+import SortingToggle from './SortingToggle';
 
 const focusAnimation = keyframes`
     from {
@@ -30,7 +33,7 @@ const focusAnimation = keyframes`
 `;
 
 const TodoListContainer = styled.div`
-    
+    position: relative;
     
     /* animation: ${focusAnimation} 1s;
     animation-fill-mode: both; */
@@ -73,16 +76,38 @@ const TodoList: React.FC<TodoListProps> = props => {
     console.log(props);
 
     const { socket } = useContext(SocketContext);
-    console.log(socket.connected);
 
-    const todoList = props.lists[props.activeListIdx];
-    const hasItems = todoList.items.length > 0;
+    const { 
+        lists, 
+        activeListIdx,
+    } = props;
 
-    const { id: listId } = todoList;
+    let {
+        id: listId,
+        title: listTitle, 
+        items: listItems,
+        sortingMode,
+     } = lists[activeListIdx];
+    if (sortingMode !== ItemSortingMode.All) {
+        // If showing only pending or done, filter the rest out
+        const sortingMask = sortingMode === ItemSortingMode.Pending ? false : true;
+        listItems = listItems.filter(item => item.isDone === sortingMask);
+
+    } else {
+        // If showing all, sort to show pending first
+        listItems = listItems.sort((a, b) => {
+            if (a.isDone && !b.isDone) { return 1; }
+            if (!a.isDone && b.isDone) { return -1; }
+            else { return 0; }
+        })
+    }
+    const hasItems = listItems.length > 0;
+
     const { 
         editTodoList,
         createTodoListItem,
-        editTodoListItem
+        editTodoListItem,
+        setItemSortingMode,
     } = props.actions; 
 
     const handleTitleEdit = (newTitle: string) => {
@@ -90,20 +115,28 @@ const TodoList: React.FC<TodoListProps> = props => {
         editTodoList(socket, listId, { title: newTitle });
     }
 
-    const handleNewItem = useCallback((itemLabel: string) => {
+    const handleNewItem = (itemLabel: string) => {
         createTodoListItem(socket, listId, itemLabel);
-    }, [createTodoListItem, listId]);
+
+        if (sortingMode === ItemSortingMode.Done) {
+            // Reset sorting mode so the new item is actually visible to the user
+            setItemSortingMode(listId, ItemSortingMode.All);
+        }
+    }
 
     return (
         <TodoListContainer>
+
+            <SortingToggle onSelect={sortingMode => { setItemSortingMode(listId, sortingMode); }} />
+
             <Editable 
                 textComponent={ListHeading}
                 placeholder={"New ToDo List"}
                 onEdit={handleTitleEdit}
-            >{todoList.title}</Editable>
+            >{listTitle}</Editable>
 
             {hasItems && (<ItemsList>
-                {todoList.items.map(item => (
+                {listItems.map(item => (
                     <TodoItem
                         key={item.id}
                         isDone={item.isDone}
@@ -133,7 +166,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     actions: bindActionCreators({
         editTodoList,
         createTodoListItem,
-        editTodoListItem
+        editTodoListItem,
+        setItemSortingMode,
     }, dispatch),
 });
 
