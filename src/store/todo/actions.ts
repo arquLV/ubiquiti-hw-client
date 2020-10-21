@@ -5,7 +5,9 @@ import { v4 as uuid } from 'uuid';
 import { TodoActionType, TodoActions, TodoListData } from './types';
 
 export const fetchTodoLists = () => (dispatch: Dispatch) => {
-    axios.get<{ lists: TodoListData[]}>(`${process.env.REACT_APP_API_URL}/todos`).then(res => {
+    axios.get<{ lists: TodoListData[]}>(`${process.env.REACT_APP_API_URL}/todos`, {
+        withCredentials: true,
+    }).then(res => {
         const { lists } = res.data;
         dispatch(populateTodoLists(lists));
 
