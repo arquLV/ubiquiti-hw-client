@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 
-const AuthButton = styled.button`
+const AuthButton = styled.button.attrs(props => ({
+    type: 'button',
+}))`
     position: relative;
     display: block;
 

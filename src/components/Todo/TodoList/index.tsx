@@ -54,6 +54,7 @@ const TodoListContainer = styled.div`
 `;
 
 const ListHeading = styled.h3`
+    position: relative;
     min-height: 34px;
     margin-bottom: 24px;
 
@@ -133,6 +134,12 @@ const TodoList: React.FC<TodoListProps> = props => {
                 textComponent={ListHeading}
                 placeholder={"New ToDo List"}
                 onEdit={handleTitleEdit}
+
+                showUserEditing={{
+                    color: '#f00',
+                    cursorStart: 1,
+                    cursorEnd: 1,
+                }}
             >{listTitle}</Editable>
 
             {hasItems && (<ItemsList>

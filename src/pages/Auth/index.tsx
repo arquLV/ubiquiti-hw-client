@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators, Dispatch } from 'redux';
 import styled from 'styled-components';
 
 import AuthInput from '../../components/Auth/AuthInput';
 import AuthButton from '../../components/Auth/AuthButton';
+import { AppState } from '../../store';
+
+import {
+    signupUser,
+} from '../../store/users/actions';
 
 const AuthForm = styled.form`
     display: block;
@@ -22,17 +29,49 @@ const AuthForm = styled.form`
     }
 `;
 
-const AuthPage: React.FC = props => {
+type AuthPageProps = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
+const AuthPage: React.FC<AuthPageProps> = props => {
+
+    const {
+        actions: { signupUser },
+    } = props;
+
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+
     return (
         <main>
             <AuthForm>
-                <AuthInput name="username">Username</AuthInput>
-                <AuthInput name="password" type="password">Password</AuthInput>
+                <AuthInput 
+                    name="username"
+                    onChange={newUsername => { setUsername(newUsername); }}
+                >Username</AuthInput>
+                <AuthInput 
+                    name="password" 
+                    type="password"
+                    onChange={newPassword => { setPassword(newPassword); }}
+                >Password</AuthInput>
 
-                <AuthButton>Login / Sign Up</AuthButton>
+                <AuthButton
+                    onClick={() => { signupUser(username, password); }}
+                >Sign Up</AuthButton>
             </AuthForm>
         </main>
     );
 }
 
-export default AuthPage;
+
+const mapStateToProps = (state: AppState) => ({
+    users: state.users,
+});
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+    actions: bindActionCreators({
+        signupUser,
+    }, dispatch),
+})
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(AuthPage);

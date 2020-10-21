@@ -12,6 +12,7 @@ const ItemContainer = styled.li`
 `;
 
 const ItemLabel = styled.label<{ crossedOut: boolean }>`
+    position: relative;
     display: inline-block;
 
     min-width: 200px;

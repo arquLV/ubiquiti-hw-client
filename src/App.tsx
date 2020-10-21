@@ -1,14 +1,19 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import styled, { ThemeProvider } from 'styled-components';
 import { Reset } from 'styled-reset';
 
+import { AppState } from './store';
+
 import AuthPage from './pages/Auth';
 import TodoPage from './pages/Todo';
+import AuthCheck from './components/Auth/AuthCheck';
 
 import GlobalStyling from './styling/GlobalStyling';
 import AppTheme from './styling/AppTheme';
 
 import { ReactComponent as TodoLogo } from './icons/todo.svg';
+
 
 const AppContainer = styled.div`
     height: 100vh;
@@ -72,31 +77,49 @@ const HeaderLogo = styled.div`
     }
 `;
 
-const App: React.FC = props => {
+type AppProps = ReturnType<typeof mapStateToProps>;
+const App: React.FC<AppProps> = props => {
+
+    const { user } = props;
+
     return (
         <React.Fragment>
             <Reset />
             <ThemeProvider theme={AppTheme}>
                 <GlobalStyling />
 
-                <AppContainer>
-                    <Header>
-                        <HeaderLogo>
-                            <TodoLogo />
-                        </HeaderLogo>
-                    </Header>
-                    <ContentWrapper>
-                        {/* <AuthPage /> */}
-                        {/* <TodoList></TodoList> */}
-                        <TodoPage />
-                    </ContentWrapper>
+                <AuthCheck>
+                    <AppContainer>
+                        <Header>
+                            <HeaderLogo>
+                                <TodoLogo />
+                            </HeaderLogo>
+                        </Header>
+                        <ContentWrapper>
+                
+                            {
+                            // Not much point for Router. Render Auth if no user,
+                            // render Todo if have one.
+                            user !== null ? (
+                                <TodoPage />
+                            ) : (
+                                <AuthPage />
+                            )}
+                
+                        </ContentWrapper>
 
-                    <Footer>Ubiquiti Home Assignment by Arturs Kurzemnieks</Footer>
-                </AppContainer>
+                        <Footer>Ubiquiti Home Assignment by Arturs Kurzemnieks</Footer>
+                    </AppContainer>
+                </AuthCheck>
             </ThemeProvider>
             
         </React.Fragment>
     );
 }
 
-export default App;
+const mapStateToProps = (state: AppState) => ({
+    user: state.users.user,
+});
+
+export default connect(mapStateToProps)(App);
+

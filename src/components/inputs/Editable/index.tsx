@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
- import TextareaAutosize from 'react-textarea-autosize';
+import styled, { css } from 'styled-components';
+import TextareaAutosize from 'react-textarea-autosize';
 
 import useClickOutside from '../../../hooks/useClickOutside';
+import { on } from 'cluster';
 
 
 const EditableInput = styled(TextareaAutosize)`
@@ -19,13 +20,29 @@ const EditableInput = styled(TextareaAutosize)`
     vertical-align: top;
 `;
 
+const EditingHighlight = styled.span<{ color: string, cursorOnly?: boolean }>`
+    background-color: ${props => props.color};
+
+    ${props => props.cursorOnly && css`
+        margin-left: -2px;
+        padding-left: 2px;
+    `}
+`;
+
 type EditableProps = {
     textComponent: React.FC<any>,
 
     children: string,
     placeholder?: string,
 
+    showUserEditing?: {
+        color: string,
+        cursorStart: number,
+        cursorEnd: number,
+    }
+
     onEdit?: (content: string) => void,
+    onCursorChange?: (start: number, end: number) => void,
 
     [otherProps: string]: any,
 }
@@ -36,7 +53,10 @@ const Editable: React.FC<EditableProps> = props => {
         textComponent: TextComponent,
         children,
         placeholder,
+        showUserEditing,
+
         onEdit,
+        onCursorChange,
         ...restProps
     } = props;
 
@@ -55,21 +75,28 @@ const Editable: React.FC<EditableProps> = props => {
     }, [editing]);
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        console.log(e);
         onEdit?.(e.target.value);
     }
 
     const handleKeydown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         const target = e.target as EventTarget & HTMLTextAreaElement;
-        console.log(target.selectionStart);
+ 
         if (["Enter", "Esc"].includes(e.key)) {
             setEditState(false);
+        } else {
+            onCursorChange?.(target.selectionStart, target.selectionEnd);
         }
     }
 
-    const handleClick = (e: React.MouseEvent<HTMLLabelElement, MouseEvent>) => {
+    const handleInactiveClick = (e: React.MouseEvent<HTMLLabelElement, MouseEvent>) => {
         setEditState(true);
     }
 
+    const handleActiveClick = (e: React.MouseEvent<HTMLTextAreaElement, MouseEvent>) => {
+        const target = e.target as EventTarget & HTMLTextAreaElement;
+        onCursorChange?.(target.selectionStart, target.selectionEnd);
+    }
     
 
     if (editing) {
@@ -78,6 +105,8 @@ const Editable: React.FC<EditableProps> = props => {
                 <EditableInput
                     onChange={handleChange}
                     onKeyDown={handleKeydown}
+                    onClick={handleActiveClick}
+
                     ref={editableRef}
                     value={children} 
                     placeholder={placeholder}
@@ -87,11 +116,35 @@ const Editable: React.FC<EditableProps> = props => {
             </TextComponent>
         )
     } else {
+        // If not editing yourself, show other users editing the item 
+        let content: any = children;
+        if (showUserEditing) {
+            const { 
+                cursorStart, 
+                cursorEnd,
+                color: userColor,
+            } = showUserEditing;
+            
+            const selectionLength = cursorEnd - cursorStart;
+            content = (
+                <React.Fragment>
+                    {children.slice(0, cursorStart)}
+                    <EditingHighlight 
+                        color={userColor}
+                        cursorOnly={selectionLength === 0}
+                    >
+                        {children.slice(cursorStart, cursorEnd)}
+                    </EditingHighlight>
+                    {children.slice(cursorEnd)}
+                </React.Fragment>
+            );
+        }    
+
         return (
             <TextComponent
-                onClick={handleClick}
+                onClick={handleInactiveClick}
                 {...restProps}
-            >{children}</TextComponent>
+            >{content}</TextComponent>
         );
     }
 }

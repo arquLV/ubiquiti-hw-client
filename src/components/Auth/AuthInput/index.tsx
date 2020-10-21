@@ -49,6 +49,8 @@ type AuthInputProps = {
     name: string,
     children: string,
     type?: 'text' | 'password',
+
+    onChange?: (newContent: string) => void,
 }
 const AuthInput: React.FC<AuthInputProps> = props => {
     const [content, setContent] = useState('');
@@ -56,6 +58,7 @@ const AuthInput: React.FC<AuthInputProps> = props => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setContent(e.target.value);
+        props.onChange?.(e.target.value);
     }
 
     return (
@@ -67,6 +70,7 @@ const AuthInput: React.FC<AuthInputProps> = props => {
                 onChange={handleChange}
                 type={props.type || 'text'}
                 value={content}
+                required={true}
             />
         </InputWrapper>
     );
