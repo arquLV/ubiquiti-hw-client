@@ -53,5 +53,8 @@
     "enzyme-adapter-react-16": "^1.15.5",
     "react-test-renderer": "^16.14.0",
     "redux-devtools-extension": "^2.13.8"
+  },
+  "engines": {
+    "node": "12.4"
   }
 }
