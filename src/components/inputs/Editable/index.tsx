@@ -1,15 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+ import TextareaAutosize from 'react-textarea-autosize';
+
 import useClickOutside from '../../../hooks/useClickOutside';
 
-const EditableInput = styled.input.attrs(props => ({
-    type: 'text',
-}))`
+
+const EditableInput = styled(TextareaAutosize)`
+    display: inline-block;
     border: none;
     font-size: inherit;
     font-weight: inherit;
+    line-height: inherit;
     padding: 0;
     width: 100%;
+    height: 100%;
+
+    resize: none;
+    vertical-align: top;
 `;
 
 type EditableProps = {
@@ -34,7 +41,7 @@ const Editable: React.FC<EditableProps> = props => {
     } = props;
 
     
-    const editableRef = useRef<HTMLInputElement>(null);
+    const editableRef = useRef<HTMLTextAreaElement>(null);
     useClickOutside(editableRef, () => {
         if (editing) {
             setEditState(false);
@@ -47,12 +54,12 @@ const Editable: React.FC<EditableProps> = props => {
         }
     }, [editing]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         onEdit?.(e.target.value);
     }
 
-    const handleKeydown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        const target = e.target as EventTarget & HTMLInputElement;
+    const handleKeydown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        const target = e.target as EventTarget & HTMLTextAreaElement;
         console.log(target.selectionStart);
         if (["Enter", "Esc"].includes(e.key)) {
             setEditState(false);
@@ -74,6 +81,8 @@ const Editable: React.FC<EditableProps> = props => {
                     ref={editableRef}
                     value={children} 
                     placeholder={placeholder}
+
+                    rows={1}
                 />
             </TextComponent>
         )
