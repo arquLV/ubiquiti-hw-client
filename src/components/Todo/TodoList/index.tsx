@@ -89,6 +89,7 @@ const TodoList: React.FC<TodoListProps> = props => {
         items: listItems,
         sortingMode,
      } = lists[activeListIdx];
+
     if (sortingMode !== ItemSortingMode.All) {
         // If showing only pending or done, filter the rest out
         const sortingMask = sortingMode === ItemSortingMode.Pending ? false : true;
@@ -112,8 +113,15 @@ const TodoList: React.FC<TodoListProps> = props => {
     } = props.actions; 
 
     const handleTitleEdit = (newTitle: string) => {
-        console.log(newTitle);
         editTodoList(socket, listId, { title: newTitle });
+    }
+
+    const handleTitleCursorChange = (start: number, end: number) => {
+        socket.emit('user-cursor', {
+            id: [listId],
+            start,
+            end,
+        });
     }
 
     const handleNewItem = (itemLabel: string) => {
@@ -133,7 +141,9 @@ const TodoList: React.FC<TodoListProps> = props => {
             <Editable 
                 textComponent={ListHeading}
                 placeholder={"New ToDo List"}
+
                 onEdit={handleTitleEdit}
+                onCursorChange={handleTitleCursorChange}
 
                 showUserEditing={{
                     color: '#f00',

@@ -97,6 +97,24 @@ const TodoPage: React.FC<TodoPageProps> = props => {
                 } = updatedItem;
                 updateTodoListItem(listId, itemId, label, isDone);
             });
+
+            type NewUserData = {
+                username: string,
+                color: string,
+            }
+            socket.on('users/new', (newUser: NewUserData) => {
+                console.log(newUser);
+            });
+
+            type UserCursorUpdate = {
+                username: string,
+                id: string[],
+                start: number,
+                end: number,
+            }
+            socket.on('user-cursor', (update: UserCursorUpdate) => {
+                console.log(update);
+            });
         });
 
 
