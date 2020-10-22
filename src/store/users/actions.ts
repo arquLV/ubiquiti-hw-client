@@ -116,7 +116,7 @@ export const checkAuth = () => (dispatch: Dispatch) => {
         withCredentials: true,
     }).then(res => {
         const { user } = res.data;
-        console.log(res.data);
+   
         if (user) {
             dispatch(setStatusAuthenticated(user.username, user.color));
         } else {

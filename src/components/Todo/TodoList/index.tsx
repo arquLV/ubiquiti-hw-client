@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Dispatch, bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 
 import { AppState } from '../../../store';
 import {

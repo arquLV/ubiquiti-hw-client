@@ -104,7 +104,6 @@ const TodoPage: React.FC<TodoPageProps> = props => {
             console.log('SOCKET CONNECTED');
             
             socket.on('todo/add', ({ listId }: { listId: string }) => {
-                console.log(listId);
                 addTodoList(listId);
             });
     
