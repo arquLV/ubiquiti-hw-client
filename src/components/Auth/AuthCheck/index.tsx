@@ -15,9 +15,10 @@ type AuthCheckProps = ReturnType<typeof mapStateToProps> & ReturnType<typeof map
  * Only proceeds to render children (app routes) after we know user status.
  */
 const AuthCheck: React.FunctionComponent<AuthCheckProps> = props => {
+    const { checkAuth } = props;
     useEffect(() => {
-        props.checkAuth();
-    }, []);
+        checkAuth();
+    }, [checkAuth]);
 
     return props.authChecked ? (
         <>{props.children}</>

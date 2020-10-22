@@ -16,29 +16,33 @@ import AppTheme from './styling/AppTheme';
 
 
 const AppContainer = styled.div`
-    height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+    min-height: 100vh;
     box-sizing: border-box;
     padding-top: 57px;
+
 `;
 
 const ContentWrapper = styled.div`
     position: relative;
     height: 100%;
+    flex-grow: 1;
 `;
 
 
 
 const Footer = styled.footer`
-    position: absolute;
+    position: static;
     bottom: 0;
     left: 0;
 
     width: 100%;
-    height: 24px;
     line-height: 24px;
     font-size: 14px;
 
-    padding: 0 12px;
+    padding: 8px 12px;
     box-sizing: border-box;
 
     color: ${props => props.theme.colors.darkGrey};

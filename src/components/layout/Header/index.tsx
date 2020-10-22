@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 
 import { AppState } from '../../../store';
-import { UserData } from '../../../store/users/types';
 
 import { ReactComponent as TodoLogo } from '../../../icons/todo.svg';
 import Avatar from './Avatar';

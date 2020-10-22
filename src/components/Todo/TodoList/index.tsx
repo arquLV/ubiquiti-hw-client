@@ -41,6 +41,7 @@ const TodoListContainer = styled.div`
     background: ${props => props.theme.colors.white};
     /* width: 500px; */
 
+    min-width: 100px;
     width: 400px;
     min-height: 400px;
     box-sizing: border-box;
@@ -51,6 +52,11 @@ const TodoListContainer = styled.div`
     margin: 32px 0 0 32px;
 
     transition: 150ms all ease-out;
+
+    @media screen and (max-width: 768px) {
+        margin: 24px 0;
+        width: 90%;
+    }
 `;
 
 const ListHeading = styled.h3`

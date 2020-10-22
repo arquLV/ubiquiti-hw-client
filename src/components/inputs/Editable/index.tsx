@@ -3,8 +3,6 @@ import styled, { css } from 'styled-components';
 import TextareaAutosize from 'react-textarea-autosize';
 
 import useClickOutside from '../../../hooks/useClickOutside';
-import { on } from 'cluster';
-
 
 const EditableInput = styled(TextareaAutosize)`
     display: inline-block;

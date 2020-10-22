@@ -25,15 +25,44 @@ import { UserCursorUpdate, UserData } from '../../store/users/types';
 import SocketContext from '../../sockets';
 
 import TodoList from '../../components/Todo/TodoList';
-import NewList from '../../components/Todo/NewList';
 import NoTodosView from '../../components/Todo/NoTodos';
 
+import { ReactComponent as PlusIcon } from '../../icons/plus.svg';
 
 
 const ListsContainer = styled.div`
     display: flex;
     flex-wrap: wrap;
     align-content: flex-start;
+
+    @media screen and (max-width: 768px) {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+`;
+
+const NewListButton = styled(PlusIcon)`
+    position: fixed;
+    width: 80px;
+    height: 80px;
+
+    bottom: 50px;
+    right: -10px;
+    cursor: pointer;
+
+    transition: 150ms ease-out all;
+    fill: ${props => props.theme.colors.blue};
+
+    &:hover {
+        fill: ${props => props.theme.colors.brightBlue};
+        right: 5px;
+    }
+
+    @media screen and (max-width: 768px) {
+        right: 10px!important;
+        bottom: 30px;
+    }
 `;
 
 type TodoPageProps = {
@@ -45,22 +74,22 @@ const TodoPage: React.FC<TodoPageProps> = props => {
 
     const { 
         todo: { lists: todoLists },
-        actions: {
+        actions,
+    } = props;
+
+    useEffect(() => {
+        const {
             fetchTodoLists, 
+            fetchOtherUsers,
             updateTodoList,
-            requestNewTodoList,
             addTodoList,
             addTodoListItem,
             updateTodoListItem,
 
             addOtherUser,
             removeOtherUser,
-            fetchOtherUsers,
             updateUserEditingStatus,
-        },
-    } = props;
-    
-    useEffect(() => {
+        } = actions;
         // GET all todo lists from server to populate first.
         fetchTodoLists();
 
@@ -128,28 +157,31 @@ const TodoPage: React.FC<TodoPageProps> = props => {
                 updateUserEditingStatus(update);
             });
         });
+    }, [socket, actions]);
 
-
-    }, [socket]);
+    const { requestNewTodoList } = actions;
+    const handleNewTodoList = () => {
+        requestNewTodoList(socket);
+    }
 
     if (todoLists.length > 0) {
         return (
-            <ListsContainer>
-                <NewList />
-                {todoLists.map(list => (
-                    <TodoList
-                        key={list.id}
-                        {...list} 
-                    />
-                ))}
-            </ListsContainer>
+            <React.Fragment>
+                <ListsContainer>
+                    {todoLists.map(list => (
+                        <TodoList
+                            key={list.id}
+                            {...list} 
+                        />
+                    ))}
+                </ListsContainer>
+                <NewListButton onClick={handleNewTodoList} />
+            </React.Fragment>
         );
     } else {
         return (
             <NoTodosView 
-                onCTAClick={() => {
-                    requestNewTodoList(socket);
-                }}
+                onCTAClick={handleNewTodoList}
             />
         );
     }
