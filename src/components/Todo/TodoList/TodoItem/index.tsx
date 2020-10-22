@@ -37,13 +37,24 @@ type TodoItemProps = {
 
     onCheckboxClick?: () => void,
     onLabelEdit?: (newLabel: string) => void,
+    onLabelStopEditing?: () => void,
+    onLabelCursorChange?: (start: number, end: number) => void,
+
+    otherUserEditing?: {
+        color: string,
+        cursorStart: number,
+        cursorEnd: number,
+    },
 }
 const TodoItem: React.FC<TodoItemProps> = props => {
 
     const { 
         isDone,
+        otherUserEditing,
         onCheckboxClick,
         onLabelEdit,
+        onLabelStopEditing,
+        onLabelCursorChange,
     } = props;
 
     return (
@@ -52,7 +63,11 @@ const TodoItem: React.FC<TodoItemProps> = props => {
             <Editable 
                 textComponent={ItemLabel}
                 onEdit={onLabelEdit}
+                onStopEditing={onLabelStopEditing}
+                onCursorChange={onLabelCursorChange}
+
                 crossedOut={isDone}
+                showUserEditing={otherUserEditing}
             >{props.children}</Editable>
         </ItemContainer>
     );

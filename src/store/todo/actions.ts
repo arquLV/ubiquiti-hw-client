@@ -107,7 +107,6 @@ export const requestNewTodoList = (socket: SocketIOClient.Socket) => (dispatch: 
 //     title: string,
 // }
 export const editTodoList = (socket: SocketIOClient.Socket, listId: string, data: { title: string }) => (dispatch: Dispatch) => {
-    console.log(listId);
     socket.emit('todo/update', {
         listId,
         data,

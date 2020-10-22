@@ -1,7 +1,12 @@
 import { Dispatch } from 'redux';
 import axios from 'axios';
 
-import { UserActions, UserActionType } from './types';
+import { 
+    UserActions, 
+    UserActionType, 
+    UserCursorUpdate, 
+    UserData,
+} from './types';
 
 const setStatusAuthentifying = (): UserActions => {
     return {
@@ -25,11 +30,63 @@ const setStatusNonAuthenticated = (): UserActions => {
     }
 }
 
-type SignupResponseData = { username: string, color: string }
+const populateUsers = (users: UserData[]): UserActions => {
+    return {
+        type: UserActionType.PopulateUsers,
+        data: {
+            users,
+        }
+    }
+}
+
+export const addOtherUser = (username: string, color: string): UserActions => {
+    return {
+        type: UserActionType.AddOtherUser,
+        data: {
+            username,
+            color,
+        }
+    }
+}
+
+export const removeOtherUser = (username: string): UserActions => {
+    return {
+        type: UserActionType.RemoveOtherUser,
+        data: {
+            username,
+        }
+    }
+}
+
+export const updateUserEditingStatus = (update: UserCursorUpdate): UserActions => {
+    return {
+        type: UserActionType.UpdateUserEditingStatus,
+        data: {
+            username: update.username,
+            id: update.id,
+            start: update.start,
+            end: update.end,
+        }
+    }
+}
+
+/*********************************************************/
+
+export const fetchOtherUsers = () => (dispatch: Dispatch) => {
+    axios.get<{ users: UserData[]}>(`${process.env.REACT_APP_API_URL}/users`).then(res => {
+        const { users } = res.data;
+        dispatch(populateUsers(users));
+
+    }).catch(err => {
+        console.error(err);
+    });
+}
+
+
 export const signupUser = (username: string, password: string) => (dispatch: Dispatch) => {
     dispatch(setStatusAuthentifying());
 
-    axios.post<SignupResponseData>(`${process.env.REACT_APP_API_URL}/signup`, {
+    axios.post<UserData>(`${process.env.REACT_APP_API_URL}/signup`, {
         username,
         password,
     }, {
@@ -45,11 +102,7 @@ export const signupUser = (username: string, password: string) => (dispatch: Dis
 }
 
 type CheckAuthResponseData = {
-    success: boolean,
-    user: {
-        username: string,
-        color: string,
-    }
+    user?: UserData,
 }
 export const checkAuth = () => (dispatch: Dispatch) => {
     dispatch(setStatusAuthentifying());

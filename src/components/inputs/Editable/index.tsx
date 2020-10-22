@@ -42,6 +42,7 @@ type EditableProps = {
     }
 
     onEdit?: (content: string) => void,
+    onStopEditing?: () => void,
     onCursorChange?: (start: number, end: number) => void,
 
     [otherProps: string]: any,
@@ -56,6 +57,7 @@ const Editable: React.FC<EditableProps> = props => {
         showUserEditing,
 
         onEdit,
+        onStopEditing,
         onCursorChange,
         ...restProps
     } = props;
@@ -65,6 +67,7 @@ const Editable: React.FC<EditableProps> = props => {
     useClickOutside(editableRef, () => {
         if (editing) {
             setEditState(false);
+            onStopEditing?.();
         }
     });
 
@@ -75,7 +78,6 @@ const Editable: React.FC<EditableProps> = props => {
     }, [editing]);
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        console.log(e);
         onEdit?.(e.target.value);
     }
 
@@ -84,6 +86,7 @@ const Editable: React.FC<EditableProps> = props => {
  
         if (["Enter", "Esc"].includes(e.key)) {
             setEditState(false);
+            onStopEditing?.();
         } else {
             onCursorChange?.(target.selectionStart, target.selectionEnd);
         }

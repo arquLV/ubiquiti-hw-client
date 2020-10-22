@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useContext } from 'react';
+import React, { useContext } from 'react';
 import { Dispatch, bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import styled, { keyframes } from 'styled-components';
@@ -10,7 +10,7 @@ import {
     editTodoListItem,
     setItemSortingMode,
 } from '../../../store/todo/actions';
-import { ItemSortingMode } from '../../../store/todo/types';
+import { ItemSortingMode, TodoListData } from '../../../store/todo/types';
 import SocketContext from '../../../sockets';
 
 import TodoItem from './TodoItem';
@@ -72,23 +72,19 @@ const ItemsList = styled.ul`
 `;
 
 
-type TodoListProps = {} & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
+type TodoListProps = TodoListData & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 const TodoList: React.FC<TodoListProps> = props => {
-    console.log(props);
 
     const { socket } = useContext(SocketContext);
 
     const { 
-        lists, 
-        activeListIdx,
+        id: listId,
+        title: listTitle,
+        sortingMode,
+        otherUsers,
     } = props;
 
-    let {
-        id: listId,
-        title: listTitle, 
-        items: listItems,
-        sortingMode,
-     } = lists[activeListIdx];
+    let { items: listItems } = props;
 
     if (sortingMode !== ItemSortingMode.All) {
         // If showing only pending or done, filter the rest out
@@ -123,6 +119,11 @@ const TodoList: React.FC<TodoListProps> = props => {
             end,
         });
     }
+    const handleStopEditing = () => {
+        socket.emit('user-cursor', {
+            id: [],
+        });
+    }
 
     const handleNewItem = (itemLabel: string) => {
         createTodoListItem(socket, listId, itemLabel);
@@ -132,6 +133,13 @@ const TodoList: React.FC<TodoListProps> = props => {
             setItemSortingMode(listId, ItemSortingMode.All);
         }
     }
+
+    // Currently shows only one user editing each element
+    // could redesign, so that Editable takes an array of them and shows all.
+    // Hope it delivers the point.
+    const listEditors = otherUsers.filter(user => user.currentlyEditing && user.currentlyEditing.id[0] === listId);
+    const titleEditor = listEditors.find(user => user.currentlyEditing && user.currentlyEditing.id.length === 1);
+    const itemEditors = listEditors.filter(user => user.currentlyEditing && user.currentlyEditing.id.length === 2);
 
     return (
         <TodoListContainer>
@@ -143,30 +151,50 @@ const TodoList: React.FC<TodoListProps> = props => {
                 placeholder={"New ToDo List"}
 
                 onEdit={handleTitleEdit}
+                onStopEditing={handleStopEditing}
                 onCursorChange={handleTitleCursorChange}
 
-                showUserEditing={{
-                    color: '#f00',
-                    cursorStart: 1,
-                    cursorEnd: 1,
-                }}
+                showUserEditing={titleEditor && titleEditor.currentlyEditing ? {
+                    color: titleEditor.color,
+                    cursorStart: titleEditor.currentlyEditing.cursorStart,
+                    cursorEnd: titleEditor.currentlyEditing.cursorEnd,
+                } : undefined}
             >{listTitle}</Editable>
 
             {hasItems && (<ItemsList>
-                {listItems.map(item => (
-                    <TodoItem
-                        key={item.id}
-                        isDone={item.isDone}
+                {listItems.map(item => {
+                    const itemEditor = itemEditors.find(user => user.currentlyEditing && user.currentlyEditing.id[1] === item.id)
+                    return (
+                        <TodoItem
+                            key={item.id}
+                            isDone={item.isDone}
+    
+                            otherUserEditing={itemEditor && itemEditor.currentlyEditing ? ({
+                                color: itemEditor.color,
+                                cursorStart: itemEditor.currentlyEditing.cursorStart,
+                                cursorEnd: itemEditor.currentlyEditing.cursorEnd,
+                            }) : undefined}
+    
+                            onCheckboxClick={() => {
+                                editTodoListItem(socket, listId, item.id, { isDone: !item.isDone });
+                            }}
+    
+                            onLabelEdit={newLabel => {
+                                editTodoListItem(socket, listId, item.id, { label: newLabel });
+                            }}
 
-                        onCheckboxClick={() => {
-                            editTodoListItem(socket, listId, item.id, { isDone: !item.isDone });
-                        }}
+                            onLabelStopEditing={handleStopEditing}
 
-                        onLabelEdit={newLabel => {
-                            editTodoListItem(socket, listId, item.id, { label: newLabel });
-                        }}
-                    >{item.label}</TodoItem>
-                ))}
+                            onLabelCursorChange={(start, end) => {
+                                socket.emit('user-cursor', {
+                                    id: [listId, item.id],
+                                    start,
+                                    end,
+                                });
+                            }}
+                        >{item.label}</TodoItem>
+                    );
+                })}
             </ItemsList>)}
             <NewItem 
                 onSubmit={handleNewItem}
@@ -176,7 +204,7 @@ const TodoList: React.FC<TodoListProps> = props => {
 }
 
 const mapStateToProps = (state: AppState) => ({
-    ...state.todo,
+    otherUsers: state.users.otherUsers,
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({

@@ -42,7 +42,6 @@ const initialState: TodoState = {
 }
 
 export default (state = initialState, action: TodoActions): TodoState => {
-    console.log(action);
     switch (action.type) {
 
         case TodoActionType.AddTodoList: {
@@ -97,11 +96,13 @@ export default (state = initialState, action: TodoActions): TodoState => {
             
             const lists = [...state.lists];
             const targetListIdx = lists.findIndex(list => list.id === listId);
-            lists[targetListIdx].items.push({
+
+            const items = [...lists[targetListIdx].items, {
                 id: itemId,
                 isDone: false,
                 label,
-            });
+            }];
+            lists[targetListIdx].items = items;
 
             return {
                 ...state,
@@ -117,7 +118,10 @@ export default (state = initialState, action: TodoActions): TodoState => {
             const targetListIdx = lists.findIndex(list => list.id === listId);
             const targetItemIdx = lists[targetListIdx].items.findIndex(item => item.id === itemId);
 
-            const item = lists[targetListIdx].items[targetItemIdx];
+            const items = [...lists[targetListIdx].items];
+            const item = items[targetItemIdx];
+
+            lists[targetListIdx].items = items;
 
             if (label !== undefined) {
                 item.label = label;

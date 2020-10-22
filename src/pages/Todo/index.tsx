@@ -11,7 +11,16 @@ import {
     addTodoListItem,
     updateTodoListItem,
 } from '../../store/todo/actions';
+
+import {
+    addOtherUser,
+    fetchOtherUsers,
+    removeOtherUser,
+    updateUserEditingStatus,
+} from '../../store/users/actions';
+
 import { AppState } from '../../store';
+import { UserCursorUpdate, UserData } from '../../store/users/types';
 
 import SocketContext from '../../sockets';
 
@@ -43,12 +52,20 @@ const TodoPage: React.FC<TodoPageProps> = props => {
             addTodoList,
             addTodoListItem,
             updateTodoListItem,
+
+            addOtherUser,
+            removeOtherUser,
+            fetchOtherUsers,
+            updateUserEditingStatus,
         },
     } = props;
-
+    
     useEffect(() => {
         // GET all todo lists from server to populate first.
         fetchTodoLists();
+
+        // GET all online users
+        fetchOtherUsers();
 
         // Establish the socket connection
         socket.connect();
@@ -98,22 +115,17 @@ const TodoPage: React.FC<TodoPageProps> = props => {
                 updateTodoListItem(listId, itemId, label, isDone);
             });
 
-            type NewUserData = {
-                username: string,
-                color: string,
-            }
-            socket.on('users/new', (newUser: NewUserData) => {
-                console.log(newUser);
+
+            socket.on('users/new', (newUser: UserData) => {
+                addOtherUser(newUser.username, newUser.color);
             });
 
-            type UserCursorUpdate = {
-                username: string,
-                id: string[],
-                start: number,
-                end: number,
-            }
+            socket.on('users/leave', (goneUser: { username: string }) => {
+                removeOtherUser(goneUser.username);
+            });
+            
             socket.on('user-cursor', (update: UserCursorUpdate) => {
-                console.log(update);
+                updateUserEditingStatus(update);
             });
         });
 
@@ -124,7 +136,12 @@ const TodoPage: React.FC<TodoPageProps> = props => {
         return (
             <ListsContainer>
                 <NewList />
-                <TodoList></TodoList>
+                {todoLists.map(list => (
+                    <TodoList
+                        key={list.id}
+                        {...list} 
+                    />
+                ))}
             </ListsContainer>
         );
     } else {
@@ -151,6 +168,11 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
         addTodoList,
         addTodoListItem,
         updateTodoListItem,
+
+        addOtherUser,
+        removeOtherUser,
+        fetchOtherUsers,
+        updateUserEditingStatus,
     }, dispatch),
 })
 

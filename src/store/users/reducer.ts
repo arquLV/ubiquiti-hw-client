@@ -2,18 +2,8 @@ import {
     UserActions, 
     UserActionType, 
     UserAuthStatus,
+    UserData,
 } from './types';
-
-type UserData = {
-    username: string,
-    color: string,
-
-    currentlyEditing?: {
-        id: string[], // e.g. [listId, itemId]
-        cursorStart: number,
-        cursorEnd: number,
-    } | null,
-}
 
 type UsersState = {
     user: UserData | null,
@@ -59,6 +49,89 @@ export default (state = initialState, action: UserActions): UsersState => {
                     username,
                     color,
                 }
+            }
+        }
+
+        case UserActionType.PopulateUsers: {
+            const { users } = action.data;
+
+            const otherUsers = users.reduce<UserData[]>((others, user) => {
+                if (state.user && user.username === state.user.username) {
+                    return others;
+                }
+
+                others.push({
+                    username: user.username,
+                    color: user.color,
+                    currentlyEditing: null,
+                });
+                return others;
+            }, []);
+  
+            return {
+                ...state,
+                otherUsers,
+            }
+        }
+
+        case UserActionType.AddOtherUser: {
+            const { username, color } = action.data;
+
+            const otherUsers = [...state.otherUsers];
+            if (otherUsers.find(user => user.username === username) !== undefined) {
+                // Already exists. Shouldn't normally happen.
+                return state;
+            }
+
+            otherUsers.push({
+                username,
+                color,
+                currentlyEditing: null,
+            });
+
+            return {
+                ...state,
+                otherUsers,
+            }
+        }
+
+        case UserActionType.RemoveOtherUser: {
+            const { username } = action.data;
+
+            const otherUsers = state.otherUsers.filter(user => user.username !== username);
+            return {
+                ...state,
+                otherUsers,
+            }
+        }
+
+        case UserActionType.UpdateUserEditingStatus: {
+            const {
+                username,
+                id,
+                start,
+                end,
+            } = action.data;
+
+            const otherUsers = [...state.otherUsers];
+            const user = otherUsers.find(user => user.username === username);
+            if (!user) {
+                return state;
+            }
+
+            if (id.length > 0 && start !== undefined && end !== undefined) {
+                user.currentlyEditing = {
+                    id,
+                    cursorStart: start,
+                    cursorEnd: end,
+                }
+            } else {
+                user.currentlyEditing = null;
+            }
+            
+            return {
+                ...state,
+                otherUsers,
             }
         }
 

@@ -26,6 +26,7 @@
     "uuid": "^8.3.1"
   },
   "scripts": {
+    "start-dev": "react-scripts start",
     "start": "serve -s _static -l tcp://0.0.0.0:$PORT -n",
     "build": "rm -r _static 2>/dev/null; react-scripts build && mv build _static",
     "test": "react-scripts test",

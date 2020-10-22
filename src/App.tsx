@@ -8,11 +8,11 @@ import { AppState } from './store';
 import AuthPage from './pages/Auth';
 import TodoPage from './pages/Todo';
 import AuthCheck from './components/Auth/AuthCheck';
+import Header from './components/layout/Header';
 
 import GlobalStyling from './styling/GlobalStyling';
 import AppTheme from './styling/AppTheme';
 
-import { ReactComponent as TodoLogo } from './icons/todo.svg';
 
 
 const AppContainer = styled.div`
@@ -26,17 +26,7 @@ const ContentWrapper = styled.div`
     height: 100%;
 `;
 
-const Header = styled.header`
-    position: fixed;
-    left: 0;
-    top: 0;
-    z-index: 100;
 
-    height: 57px;
-    width: 100%;
-
-    background: ${props => props.theme.colors.darkGrey};
-`;
 
 const Footer = styled.footer`
     position: absolute;
@@ -59,28 +49,13 @@ const Footer = styled.footer`
     }
 `;
 
-const HeaderLogo = styled.div`
-    position: absolute;
-    left: 0;
-    top: 0;
 
-    width: 57px;
-    height: 100%;
-
-    background-color: ${props => props.theme.colors.blue};
-
-    svg {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate3d(-50%, -50%, 0);
-    }
-`;
 
 type AppProps = ReturnType<typeof mapStateToProps>;
 const App: React.FC<AppProps> = props => {
 
     const { user } = props;
+    const isAuthenticated = user !== null;
 
     return (
         <React.Fragment>
@@ -90,17 +65,13 @@ const App: React.FC<AppProps> = props => {
 
                 <AuthCheck>
                     <AppContainer>
-                        <Header>
-                            <HeaderLogo>
-                                <TodoLogo />
-                            </HeaderLogo>
-                        </Header>
+                        <Header />
                         <ContentWrapper>
                 
                             {
                             // Not much point for Router. Render Auth if no user,
                             // render Todo if have one.
-                            user !== null ? (
+                            isAuthenticated ? (
                                 <TodoPage />
                             ) : (
                                 <AuthPage />
