@@ -25,6 +25,8 @@ const InputLabel = styled.label<InputLabelProps>`
     transition: 150ms all ease-out;
 
     ${props => props.maximized && css`
+        pointer-events: none;
+
         font-size: 18px;
         line-height: 24px;
 
