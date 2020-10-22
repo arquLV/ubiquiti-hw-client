@@ -24,6 +24,8 @@ like this it's better to do things from scratch and leave some rough edges than 
 
 ![App screenshot](todoquiti-screenshot.jpg?raw=true "App screenshot")
 
+### To start locally: `yarn start-dev`
+
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -31,7 +33,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 In the project directory, you can run:
 
-### `yarn start`
+### `yarn start-dev`
 
 Runs the app in the development mode.<br />
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
