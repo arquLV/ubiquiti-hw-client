@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { bindActionCreators, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
 import { AppState } from '../../../store';
+import { logOut } from '../../../store/users/actions';
+import SocketContext from '../../../sockets';
 
 import { ReactComponent as TodoLogo } from '../../../icons/todo.svg';
 import Avatar from './Avatar';
@@ -62,10 +65,26 @@ const OnlineUsersLabel = styled.div`
     }
 `;
 
-type HeaderProps = ReturnType<typeof mapStateToProps>;
-const Header: React.FC<HeaderProps> = props => {
+const Logout = styled.div`
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translate3d(0, -50%, 0);
+    cursor: pointer;
 
-    const { user, otherUsers } = props;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: ${props => props.theme.colors.white};
+`;
+
+type HeaderProps = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
+const Header: React.FC<HeaderProps> = props => {
+    const { socket } = useContext(SocketContext);
+    const { 
+        user, 
+        otherUsers,
+        actions: { logOut },
+    } = props;
     
     let onlineUserAvatars;
     if (user) {
@@ -94,6 +113,8 @@ const Header: React.FC<HeaderProps> = props => {
                 <HeaderLogo />
             </LogoContainer>
             {onlineUserAvatars}
+
+            {user && <Logout onClick={() => { logOut(socket); }}>Log Out</Logout>}
         </HeaderContainer>
     );
 }
@@ -103,4 +124,12 @@ const mapStateToProps = (state: AppState) => ({
     otherUsers: state.users.otherUsers,
 });
 
-export default connect(mapStateToProps)(Header);
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+    actions: bindActionCreators({ logOut }, dispatch),
+});
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(Header);

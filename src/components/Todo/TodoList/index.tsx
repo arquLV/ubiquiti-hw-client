@@ -6,6 +6,7 @@ import styled, { keyframes } from 'styled-components';
 import { AppState } from '../../../store';
 import {
     editTodoList,
+    deleteTodoList,
     createTodoListItem,
     editTodoListItem,
     setItemSortingMode,
@@ -18,32 +19,21 @@ import Editable from '../../inputs/Editable';
 import NewItem from './NewItem';
 import SortingToggle from './SortingToggle';
 
-const focusAnimation = keyframes`
-    from {
-        position: absolute;
-        transform: translate3d(0, 0, 0);
-    }
+import { ReactComponent as TrashIcon } from '../../../icons/trash.svg';
 
-    to {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate3d(-50%, -50%, 0);
-    }
-`;
 
 const TodoListContainer = styled.div`
     position: relative;
-    
-    /* animation: ${focusAnimation} 1s;
-    animation-fill-mode: both; */
-
+    display: flex;
+    flex-direction: column;
+   
     background: ${props => props.theme.colors.white};
-    /* width: 500px; */
-
+    
     min-width: 100px;
     width: 400px;
     min-height: 400px;
+    max-height: 600px;
+
     box-sizing: border-box;
 
     border-radius: 8px;
@@ -70,11 +60,42 @@ const ListHeading = styled.h3`
 
     padding-bottom: 8px;
     border-bottom: 1px solid ${props => props.theme.colors.lightGrey};
+    
+    /* flex: 1 0 auto; */
+    flex-basis: auto;
 `;
 
 const ItemsList = styled.ul`
     padding: 0 0 24px 24px;
     border-bottom: 1px solid ${props => props.theme.colors.lightGrey};
+
+    min-height: 24px;
+    flex-shrink: 1;
+
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+`;
+
+const DeleteButton = styled(TrashIcon)`
+    position: absolute;
+    top: 8px;
+    right: 20px;
+
+    height: 25px;
+    width: 20px;
+
+    cursor: pointer;
+    transition: 100ms all ease-out;
+
+    fill: ${props => props.theme.colors.darkGrey};
+    opacity: 0.3;
+
+    &:hover {
+        opacity: 1;
+    }
 `;
 
 
@@ -109,6 +130,7 @@ const TodoList: React.FC<TodoListProps> = props => {
 
     const { 
         editTodoList,
+        deleteTodoList,
         createTodoListItem,
         editTodoListItem,
         setItemSortingMode,
@@ -116,6 +138,9 @@ const TodoList: React.FC<TodoListProps> = props => {
 
     const handleTitleEdit = (newTitle: string) => {
         editTodoList(socket, listId, { title: newTitle });
+    }
+    const handleListDelete = () => {
+        deleteTodoList(socket, listId);
     }
 
     const handleTitleCursorChange = (start: number, end: number) => {
@@ -151,6 +176,7 @@ const TodoList: React.FC<TodoListProps> = props => {
         <TodoListContainer>
 
             <SortingToggle onSelect={sortingMode => { setItemSortingMode(listId, sortingMode); }} />
+            <DeleteButton onClick={handleListDelete} />
 
             <Editable 
                 textComponent={ListHeading}
@@ -216,6 +242,7 @@ const mapStateToProps = (state: AppState) => ({
 const mapDispatchToProps = (dispatch: Dispatch) => ({
     actions: bindActionCreators({
         editTodoList,
+        deleteTodoList,
         createTodoListItem,
         editTodoListItem,
         setItemSortingMode,

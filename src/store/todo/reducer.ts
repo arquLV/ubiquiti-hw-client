@@ -16,29 +16,7 @@ const initialState: TodoState = {
     activeListIdx: 0,
     loaded: false,
     
-    lists: [
-        // {
-        //     id: 'testlist',
-        //     title: 'Shopping list',
-        //     items: [
-        //         {
-        //             id: 'first',
-        //             label: 'Milk',
-        //             isDone: false,
-        //         },
-        //         {
-        //             id: 'second',
-        //             label: 'Bread',
-        //             isDone: false,
-        //         },
-        //         {
-        //             id: 'third',
-        //             label: 'Pasta',
-        //             isDone: true,
-        //         },
-        //     ],
-        // }
-    ],
+    lists: [],
 }
 
 export default (state = initialState, action: TodoActions): TodoState => {
@@ -50,7 +28,7 @@ export default (state = initialState, action: TodoActions): TodoState => {
             const lists = [...state.lists];
             const newListsLength = lists.push({
                 id: listId,
-                title: 'New ToDo List',
+                title: '',
                 items: [],
 
                 sortingMode: ItemSortingMode.All,
@@ -88,6 +66,16 @@ export default (state = initialState, action: TodoActions): TodoState => {
             return {
                 ...state,
                 lists
+            }
+        }
+
+        case TodoActionType.RemoveTodoList: {
+            const { listId } = action.data;
+
+            const lists = state.lists.filter(list => list.id !== listId);
+            return {
+                ...state,
+                lists,
             }
         }
 

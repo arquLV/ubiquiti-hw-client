@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { 
     fetchTodoLists,
     updateTodoList,
+    removeTodoList,
     requestNewTodoList,
     addTodoList,
     addTodoListItem,
@@ -82,6 +83,7 @@ const TodoPage: React.FC<TodoPageProps> = props => {
             fetchTodoLists, 
             fetchOtherUsers,
             updateTodoList,
+            removeTodoList,
             addTodoList,
             addTodoListItem,
             updateTodoListItem,
@@ -114,6 +116,10 @@ const TodoPage: React.FC<TodoPageProps> = props => {
             }
             socket.on('todo/update', (update: TodoUpdateRequest) => {
                 updateTodoList(update.listId, update.data.title);
+            });
+
+            socket.on('todo/delete', (deleted: { listId: string }) => {
+                removeTodoList(deleted.listId);
             });
     
             type TodoNewItemRequest = {
@@ -157,6 +163,10 @@ const TodoPage: React.FC<TodoPageProps> = props => {
                 updateUserEditingStatus(update);
             });
         });
+
+        socket.on('disconnect', () => {
+            socket.removeAllListeners();
+        });
     }, [socket, actions]);
 
     const { requestNewTodoList } = actions;
@@ -196,6 +206,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     actions: bindActionCreators({
         fetchTodoLists,
         updateTodoList,
+        removeTodoList,
         requestNewTodoList,
         addTodoList,
         addTodoListItem,

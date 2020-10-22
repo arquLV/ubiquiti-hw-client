@@ -73,7 +73,9 @@ export const updateUserEditingStatus = (update: UserCursorUpdate): UserActions =
 /*********************************************************/
 
 export const fetchOtherUsers = () => (dispatch: Dispatch) => {
-    axios.get<{ users: UserData[]}>(`${process.env.REACT_APP_API_URL}/users`).then(res => {
+    axios.get<{ users: UserData[]}>(`${process.env.REACT_APP_API_URL}/users`, {
+        withCredentials: true,
+    }).then(res => {
         const { users } = res.data;
         dispatch(populateUsers(users));
 
@@ -97,6 +99,9 @@ export const signupUser = (username: string, password: string) => (dispatch: Dis
        
     }).catch(err => {
         console.error(err.response);
+        if (err.response.status === 409) {
+            window.alert('Username taken!');
+        }
         dispatch(setStatusNonAuthenticated());
     });
 }
@@ -120,5 +125,37 @@ export const checkAuth = () => (dispatch: Dispatch) => {
     }).catch(err => {
         console.error(err);
         dispatch(setStatusNonAuthenticated());
+    });
+}
+
+export const logIn = (username: string, password: string) => (dispatch: Dispatch) => {
+    axios.post<UserData>(`${process.env.REACT_APP_API_URL}/login`, {
+        username,
+        password,
+    }, {
+        withCredentials: true,
+    }).then(res => {
+            const { username, color } = res.data;
+            if (username && color) {
+                dispatch(setStatusAuthenticated(username, color));
+            } else {
+                dispatch(setStatusNonAuthenticated());
+            }
+    }).catch(err => {
+        console.error(err.response);
+        if (err.response.status === 401) {
+            window.alert('Invalid username or password!');
+        }
+    });
+}
+
+export const logOut = (socket: SocketIOClient.Socket) => (dispatch: Dispatch) => {
+    axios.post(`${process.env.REACT_APP_API_URL}/logout`, {}, {
+        withCredentials: true,
+    }).then(res => {
+            socket.disconnect();
+            dispatch(setStatusNonAuthenticated());
+    }).catch(err => {
+        console.error(err);
     });
 }

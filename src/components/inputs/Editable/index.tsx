@@ -119,7 +119,9 @@ const Editable: React.FC<EditableProps> = props => {
     } else {
         // If not editing yourself, show other users editing the item 
         let content: any = children;
-        if (showUserEditing) {
+        if (!content) {
+            content = placeholder;
+        } else if (showUserEditing) {
             const { 
                 cursorStart, 
                 cursorEnd,

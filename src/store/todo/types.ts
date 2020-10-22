@@ -20,6 +20,7 @@ export type TodoListData = {
 export enum TodoActionType {
     AddTodoList = "ADD_TODO_LIST",
     UpdateTodoList = "UPDATE_TODO_LIST",
+    RemoveTodoList = "REMOVE_TODO_LIST",
     PopulateTodoLists = "POPULATE_TODO_LISTS",
 
     AddTodoListItem = "ADD_TODO_LIST_ITEM",
@@ -49,6 +50,13 @@ interface UpdateTodoListAction {
     data: {
         listId: string,
         title: string,
+    }
+}
+
+interface RemoveTodoListAction {
+    type: TodoActionType.RemoveTodoList,
+    data: {
+        listId: string,
     }
 }
 
@@ -95,5 +103,6 @@ interface SetItemSortingModeAction {
     }
 }
 
-export type TodoActions = AddTodoListAction | PopulateTodoListsAction | UpdateTodoListAction | AddTodoListItemAction | 
-    UpdateTodoListItemAction | SetTodoItemDoneAction | SetTodoItemPendingAction | SetItemSortingModeAction;
+export type TodoActions = AddTodoListAction | PopulateTodoListsAction | UpdateTodoListAction |
+    RemoveTodoListAction | AddTodoListItemAction | UpdateTodoListItemAction | SetTodoItemDoneAction | 
+    SetTodoItemPendingAction | SetItemSortingModeAction;

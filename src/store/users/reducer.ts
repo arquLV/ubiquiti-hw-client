@@ -16,11 +16,7 @@ const initialState: UsersState = {
     user: null,
     authStatus: UserAuthStatus.Unknown,
 
-    otherUsers: [{
-        username: 'testyboi',
-        color: '#f00',
-        currentlyEditing: null,
-    }],
+    otherUsers: [],
 }
 
 export default (state = initialState, action: UserActions): UsersState => {
@@ -36,6 +32,7 @@ export default (state = initialState, action: UserActions): UsersState => {
         case UserActionType.SetNonAuthenticated: {
             return {
                 ...state,
+                user: null,
                 authStatus: UserAuthStatus.NonAuthenticated,
             }
         }

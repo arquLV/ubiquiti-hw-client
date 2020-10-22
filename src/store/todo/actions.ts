@@ -44,6 +44,15 @@ export const updateTodoList = (listId: string, title: string): TodoActions => {
     }
 }
 
+export const removeTodoList = (listId: string): TodoActions => {
+    return {
+        type: TodoActionType.RemoveTodoList,
+        data: {
+            listId,
+        }
+    }
+}
+
 export const addTodoListItem = (listId: string, itemId: string, label: string): TodoActions => {
     return {
         type: TodoActionType.AddTodoListItem,
@@ -82,7 +91,9 @@ export const setItemSortingMode = (listId: string, sortingMode: ItemSortingMode)
 
 
 export const fetchTodoLists = () => (dispatch: Dispatch) => {
-    axios.get<{ lists: TodoListData[]}>(`${process.env.REACT_APP_API_URL}/todos`).then(res => {
+    axios.get<{ lists: TodoListData[]}>(`${process.env.REACT_APP_API_URL}/todos`, {
+        withCredentials: true,
+    }).then(res => {
         const { lists } = res.data;
         dispatch(populateTodoLists(lists));
 
@@ -115,6 +126,13 @@ export const editTodoList = (socket: SocketIOClient.Socket, listId: string, data
     dispatch(updateTodoList(listId, data.title));
 }
 
+export const deleteTodoList = (socket: SocketIOClient.Socket, listId: string) => (dispatch: Dispatch) => {
+    socket.emit('todo/delete', {
+        listId
+    });
+
+    dispatch(removeTodoList(listId));
+}
 
 export const createTodoListItem = (socket: SocketIOClient.Socket, listId: string, label: string) => (dispatch: Dispatch) => {
     const itemTempId = uuid();
